@@ -3,8 +3,8 @@ import datetime as dt
 import re
 import copy
 import glob
-from sqlalchemy import create_engine
-from sqlalchemy import Column, Integer, String
+
+from .models import session, Observation
 
 outformat = [
     'year','month','day','hour','minute','secend','wind_direction','wind_speed',
@@ -32,16 +32,6 @@ class Grammar(object):
      qnh_qfe_tem_td = re.compile(r'\b(\d{4}.\d)(\d{4}.\d)(\d{2}.\d|\d{1}.\d)/(\d{2}.\d|\d{1}.\d)\b')   #qnh修正海平面气压 qfe场压   
      rh = re.compile(r'\b(\d{2}.\d|\d{2})\b')              
      weather = re.compile(r'([-+]?({})[0-9]?)|(({})[0-9]?)'.format('|'.join(weatherWithIntensity), '|'.join(weather)))                    
-
-engine = create_engine('sqlite:///:memory:', echo=True)
-class Data(object):
-    __tablename__ = 'origin_data'
-    id = Column(Integer, primary_key=True)
-
-    for i in range(len(outputfile)):
-        exec("outputfile[%s] = Column(String)"%i)
-#    def __repr__(self):
-#        return "<User(name='%s', fullname='%s', nickname='%s')>" % (self.name, self.fullname, self.nickname)
 
 def main():
     outputfile()

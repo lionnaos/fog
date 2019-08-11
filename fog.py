@@ -1,13 +1,11 @@
 import os
-import datetime as dt
+import datetime
 import re
 import copy
 import glob
-
-from .models import session, Observation
-
+from models import session, Observation
 outformat = [
-    'year','month','day','hour','minute','secend','wind_direction','wind_speed',
+    'year', 'month', 'day', 'hour','minute','secend','wind_direction','wind_speed',
     'wind_range','rvr','vis','cloud_heigt','cloud','qnh','qfe','tem','td','rh','weather'
 ]
        
@@ -22,7 +20,8 @@ weatherWithIntensity = [
 ]
 
 class Grammar(object):
-     time_wind = re.compile(r'\b([0-3][0-9])([0-5][0-9]):([0-5][0-9]):([0-5][0-9])R09([0-9][0-9][0-9])/([0-9])\b')
+     time = re.compile(r'(\d{4}:\d{2}:\d{2})R09')
+     wind = re.compile(r'(R09:\d{}')
      wind_range = re.compile(r'\b(\d{3}V\d{3})\b')
      rvr = re.compile(r'\b(2000|[0-1][0-9][0-9][0-9])\b')
      vis_cloud_heigt = re.compile(r'\b(\d{2}000)(\d{3})\b')
@@ -50,10 +49,12 @@ def find_filenames(path):
     filenames = glob.glob(pathname)
     return filenames
 
-def open_file(filenames, grammar=Grammar):
+def open_file(filepath, grammar=Grammar):
 
     #for filename in filenames:
-    with open(filenames) as f:
+    with open(filepath) as f:
+        filename = os.path.basename(filepath)
+        filename, _ = os.path.splitext(filename)
         for line in f:
             lines = line.strip().split() #strip去除收尾的空格或换行符，split对字符串中间的空格进行切片
             #print(lines)
@@ -64,16 +65,22 @@ def open_file(filenames, grammar=Grammar):
                 for key in lines:
                     if key == 'MID':
                         break
-                    pattern = getattr(grammar, 'time_wind')
-                    if grammar.time_wind.match(key):
-                        tw = grammar.time_wind.match(key)
-                        out['day'] = tw.group(1)
-                        out['hour'] = tw.group(2)
-                        out['minute'] = tw.group(3)
-                        out['secend'] = tw.group(4)
-                        out['wind_direction'] = tw.group(5)
-                        out['wind_speed'] = tw.group(6)
-                        print(day,hour,minute,secend,wind_direction,wind_speed)
+
+                    ob = Observation()
+
+                    if grammar.weather.match(key):
+                        out['weather'] = key[0:3]
+
+                    pattern = getattr(grammar, 'time')
+                    if grammar.time.match(key):
+                        tw = grammar.time.match(key)
+                        time = filename + tw.group(1)
+                        dt = datetime.datetime.strptime(time, "%Y-%m%d%H:%M:%S")
+                        ob.created = dt
+                        #print(dt)
+                    if grammar.wind_range.match(key):
+                        out['wind_range'] = key
+                        #print(wind_range.group(1)) 
 
                     if grammar.wind_range.match(key):
                         out['wind_range'] = key
@@ -112,10 +119,13 @@ def open_file(filenames, grammar=Grammar):
                         if grammar.rh.match(rhh):
                             out['rh'] = rhh
                             #print(rh) 
+
+                    session.add(ob)
                     #print(out)
-                for key in line:
-                    if grammar.weather.match(key):
-                        out['weather'] = key[0:3]
+                session.commit()
+
+            
+                                        
             validator(lines)
 
             # out = dict.fromkeys(outformat, 999999)  

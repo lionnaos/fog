@@ -12,17 +12,17 @@ class Observation(Base):
     __tablename__ = 'observations'
 
     id = Column(Integer, primary_key=True)
-    # wind = Column(String)
-    # rvr = Column(String)
-    # vis = Column(String)
-    # cloud = Column(String)
-    # qnh = Column(String)
-    # qfe = Column(String)
-    # temperature = Column(String)
-    # dewpoint = Column(String)
-    # relative_humidity = Column(String)
-    # weather = Column(String)
     created = Column(DateTime)
+    wind = Column(String)
+    rvr = Column(String)
+    vis = Column(String)
+    cloud = Column(String)
+    qnh = Column(String)
+    qfe = Column(String)
+    temperature = Column(String)
+    dewpoint = Column(String)
+    relative_humidity = Column(String)
+    weather = Column(String)
 
     def wind_range(self):
         return self.wind

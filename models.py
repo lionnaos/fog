@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, DateTime
 
-engine = create_engine('sqlite:///db.sqlite3', echo=False)
+engine = create_engine('sqlite:///db01.sqlite3', echo=False)
 Base = declarative_base()
 
 class Observation(Base):
@@ -15,7 +15,9 @@ class Observation(Base):
     created = Column(DateTime)
     wind = Column(String)
     rvr = Column(String)
+    rvrtrend = Column(String)
     vis = Column(String)
+    clh = Column(String)
     cloud = Column(String)
     qnh = Column(String)
     qfe = Column(String)
@@ -23,6 +25,7 @@ class Observation(Base):
     dewpoint = Column(String)
     relative_humidity = Column(String)
     weather = Column(String)
+
 
     def wind_range(self):
         return self.wind
